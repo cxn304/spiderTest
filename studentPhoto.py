@@ -7,7 +7,7 @@ class Photos(object):
         self.server = 'http://job.lzu.edu.cn/'
         self.target = 'http://job.lzu.edu.cn/getImr!getStuQzyx.action'
         self.name = []  # student's name
-        self.url = []   # 几个大模块的url
+        self.url = []   # 几个大模块的url 
         self.num = 0  # stu's number
 
     def getphoto(self):
