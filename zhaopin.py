@@ -15,7 +15,7 @@ req = requests.get(target+'?begin=6&page=1&number=100', headers=head, timeout=10
 req.encoding = 'utf-8'
 html = req.text
 baconfile = open('name.html', 'wb')
-baconfile.write(req.content)
+baconfile.write(req.content)   #  注意如果是保存网页或图片或其他二进制文件后面是.content  如果有class对象。则是.iter_content???
 div_bf = BeautifulSoup(html, "html.parser")
 div = div_bf.find_all('div', class_='nr')
 j = 0
