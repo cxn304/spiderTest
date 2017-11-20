@@ -2,16 +2,18 @@
 import requests, os, re
 from bs4 import BeautifulSoup
 
-head = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393',
-        'Host': 'www.xicidaili.com',
-        'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
-        'Accept-Encoding': 'gzip,deflate',
-        'Connection': 'keep-alive'
-        }  # Host用来伪装
-# r = requests.get('http://www.xicidaili.com/', headers=head)
-# print(r.text)
-# with open('proxy.txt', 'w') as f:
-    # f.write(r.text)
+def getProxy():
+    head = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393',
+            'Host': 'www.xicidaili.com',
+            'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
+            'Accept-Encoding': 'gzip,deflate',
+            'Connection': 'keep-alive'
+            }  # Host用来伪装
+    r = requests.get('http://www.xicidaili.com/', headers=head)
+    print(r.text)
+    with open('proxy.txt', 'w') as f:
+        f.write(r.text)
+
 
 def proxy_dict():
     path = os.path.abspath('.\\proxy.txt')
@@ -34,8 +36,38 @@ def proxy_dict():
 
     return proxyDict
 
-myDict = proxy_dict()
-print(myDict)
+
+def openProxy(Dict):
+    for i in range(40, 60):
+        try:
+            proxy = Dict['http'][i]
+            proxies = {'http': proxy,
+                       'https': proxy}
+            content = requests.get('http://ip.chinaz.com/getip.aspx', proxies=proxies)
+            # 存下这个以备用{ip:'122.72.18.34',address:'山西省 铁通'}  get函数的是返回Response格式的东西
+            #content.encode()
+            print(content.text)
+        except:
+            print('error', i)
+
+def openProxy1(Dict,n):   # 用递归实现
+    try:
+        proxy = Dict['http'][n]
+        proxies = {'http': proxy,
+                   'https': proxy}
+        content = requests.get('http://ip.chinaz.com/getip.aspx', proxies=proxies)
+        # 存下这个以备用{ip:'122.72.18.34',address:'山西省 铁通'}  get函数的是返回Response格式的东西
+        #content.encode()
+        print(content.text)
+    except:
+        print('error', n)
+        openProxy1(Dict, n-1)
+
+
+if __name__ == '__main__':
+    #getProxy()
+    myDict = proxy_dict()
+    openProxy(myDict)
 
 
 
