@@ -50,7 +50,7 @@ def openProxy(Dict):
         except:
             print('error', i)
 
-def openProxy1(Dict,n):   # 用递归实现
+def openProxy1(Dict,n):  # 用递归实现
     try:
         proxy = Dict['http'][n]
         proxies = {'http': proxy,
