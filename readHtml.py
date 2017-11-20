@@ -29,7 +29,7 @@ target = 'http://job.lzu.edu.cn/'
 path = os.path.abspath('.\\name.txt')
 photoPath = os.path.abspath('.\\images')
 req = open(path, 'r')
-html = req.read()  # str类型数据
+html = req.read()   # str类型数据
 div_bf = BeautifulSoup(html, "html.parser")  # BeautifulSoup类型数据
 div = div_bf.find_all('div', class_='nr')  # ResultSet类型数据
 a = div_bf.find_all('img')  # 找寻照片标签
