@@ -1,0 +1,36 @@
+# -*- coding:UTF-8 -*-
+import requests, re, time
+from bs4 import BeautifulSoup
+
+proxy = 'http://27.215.99.59:8888'
+proxies = {'http': proxy,
+           'https': proxy}
+
+pages = []
+def getLinks(pageUrl):
+    global pages
+    proxy = 'http://27.215.99.59:8888'
+    proxies = {'http': proxy,
+               'https': proxy}
+    html = requests.get('http://job.lzu.edu.cn'+pageUrl, proxies=proxies)
+    html.encoding = 'utf-8'
+    lj = BeautifulSoup(html.text, "html.parser")
+    for link in lj.find_all('a', href=re.compile(r'htmlfile')):
+        url = link.get('href')
+        print(url)
+        fine = url.split('/')
+        print(fine)
+        if fine[-1] not in pages:
+            newPage = link.get('href')
+            if 'http://job.lzu.edu.cn' in newPage:
+                tem = newPage[21:]
+                print(tem)
+                pages.append(tem)
+                getLinks(tem)
+            else:
+                print(newPage)
+                pages.append(newPage)
+                getLinks(newPage)
+
+
+getLinks("")
