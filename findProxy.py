@@ -1,26 +1,27 @@
 # -*- coding:UTF-8 -*-
-import requests, os, re
-from bs4 import BeautifulSoup
+import requests, os, re, time
+from threading import Thread
 
-def getProxy():
-    head = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393',
-            'Host': 'www.xicidaili.com',
-            'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
-            'Accept-Encoding': 'gzip,deflate',
-            'Connection': 'keep-alive'
-            }  # Host用来伪装
+
+def getProxy(): # 获取整个网页
+    head = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393',
+        'Host': 'www.xicidaili.com',
+        'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
+        'Accept-Encoding': 'gzip,deflate',
+        'Connection': 'keep-alive'
+    }  # Host用来伪装
     r = requests.get('http://www.xicidaili.com/nn/', headers=head)
-    print(r.text)
-    with open('proxy.txt', 'w') as f:
-        f.write(r.text)
+    with open('proxy.txt', 'w') as fp:
+        fp.write(r.text)
 
 
 def proxy_dict():
     path = os.path.abspath('.\\proxy.txt')
     req = open(path, 'r')
     html = req.read()  # str类型数据
-    proxyIp = re.findall(r'\d+\.\d+\.\d+\.\d+', html)    # findall适用于文本类型的数据  # 匹配ip地址
-    proxyPort = re.findall(r'<td>\d+</td>', html)     # 匹配端口
+    proxyIp = re.findall(r'\d+\.\d+\.\d+\.\d+', html)  # findall适用于文本类型的数据  # 匹配ip地址
+    proxyPort = re.findall(r'<td>\d+</td>', html)  # 匹配端口
     pTemp = ''.join(proxyPort)  # join的作用是把列表中的各个值连接起来成一个大字符串
     proxyDict = {}
     proxyDict.setdefault('http', [])
@@ -37,51 +38,53 @@ def proxy_dict():
     return proxyDict
 
 
-def openProxy(Dict):
-    i = 0
-    while Dict['http'][i]:
-        if i == len(Dict['http'])-1:
-            break
-        else:
-            try:
-                proxy = Dict['http'][i]
-                proxies = {'http': proxy,
-                           'https': proxy}
-                content = requests.get('http://ip.chinaz.com/getip.aspx', proxies=proxies, timeout=50)
-                # 存下这个以备用{ip:'122.72.18.34',address:'山西省 铁通'}  get函数的是返回Response格式的东西
-                #content.encode()
-                print(content.text)
-                i += 1
-            except:
-                print('error', i)
-                del Dict['http'][i]
-    with open('canUse.txt', 'w') as f:
-        f.write(Dict)
-    return Dict
-
-def openProxy1(Dict,n):  # 用递归实现
+def openProxy(Dict, i):
     try:
+        head = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+            "Referer": "http://ip.tool.chinaz.com/"
+        }
+        proxy = Dict['http'][i]
+        proxies = {'http': proxy,
+                   'https': proxy}
+        content = requests.get('http://ip.tool.chinaz.com/' + proxy, headers=head, proxies=proxies, timeout=50)
+        # get函数的是返回Response格式的东西
+        # content.encode()
+        print(proxy)
+    except Exception as e:
+        print(e)
+
+
+def openProxy1(Dict, n):  # 用递归实现
+    try:
+        head = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+            "Referer": "http://ip.tool.chinaz.com/"
+        }
         proxy = Dict['http'][n]
         proxies = {'http': proxy,
                    'https': proxy}
-        content = requests.get('http://ip.chinaz.com/getip.aspx', proxies=proxies, timeout=50)
-        # 存下这个以备用{ip:'122.72.18.34',address:'山西省 铁通'}  get函数的是返回Response格式的东西
+        content = requests.get('http://ip.tool.chinaz.com/' + proxy, proxies=proxies, timeout=50)
+        # get函数的是返回Response格式的东西
         # content.encode()
         print(content.text)
     except:
         print('error', n)
-        openProxy1(Dict, n-1)
+        openProxy1(Dict, n - 1)
 
 
-if __name__ == '__main__':
-    # getProxy()
-    myDict = proxy_dict()
-    print(myDict)
-    with open('m.txt', 'w') as f:
-        for ip in myDict['http']:
-            f.write(ip)
-            f.write(',')
-    # canUse = openProxy(myDict)
-    # print(canUse)
+getProxy()
+myDict = proxy_dict()
+
+# 以下开启多线程进行服务器选取
+j = 0
+while myDict['http'][j]:
+    if j == len(myDict['http']) - 1:
+        break
+    else:
+        Thread(target=openProxy,args=(myDict, j,)).start()
+        j += 1
 
 
+# canUse = openProxy(myDict)
+# print(canUse)
